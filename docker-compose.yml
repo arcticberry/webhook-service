@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+  application-service:
+    image: application-service:latest
+    container_name: application-service
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+         RABBITMQ_URL: ${RABBITMQ_URL}
+         APPLICATION_QUEUE: ${APPLICATION_QUEUE}
+         WALLET_QUEUE: ${WALLET_QUEUE}
+         SETTINGS_QUEUE: ${SETTINGS_QUEUE}
+         MONGO_URL_APPLICATION: ${MONGO_URL_APPLICATION}
+         ELASTIC_SEARCH_URL: ${ELASTIC_SEARCH_URL}
+         
+    # ports:
+    #     - "${PORT}:${PORT}"
