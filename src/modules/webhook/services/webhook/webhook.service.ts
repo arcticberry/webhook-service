@@ -67,10 +67,12 @@ export class WebhookService {
         throw new Error('Error in handler');
       }
     } catch (error) {
-      Logger.error({error}, error.message);
+
+      new Logger.error({error}, error.message);
       const { code } = error;
       let statusCode = 500
       let header= {}
+  
   
       if (error.response){
 
@@ -88,7 +90,6 @@ export class WebhookService {
           : WebhookStatus.FAILED,
         headers: header,
       });
-
 
       await this.webhookRepo.updateWebhookWithId(getContent.id, {
         retryAttempt: getContent.try_attempt,
