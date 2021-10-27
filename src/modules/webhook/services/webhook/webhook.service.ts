@@ -1,6 +1,6 @@
 // import { HttpService } from '@nestjs/axios';
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventBus } from '@nestjs/cqrs';
 import { TimeoutError } from 'rxjs/internal/operators/timeout';
 import ObjectLiteral from 'src/shared/interfaces/object-literal.interface';
@@ -39,8 +39,8 @@ export class WebhookService {
       const httpRequest = new WebookHttpService(new HttpService());
       const makeCall = await httpRequest.post(getContent.url, payload);
 
-      console.log("I GOT HERE",{makeCall})
       const { status, headers } = makeCall;
+
 
       if (successCode.includes(status)) {
         const webhookHistory = await this.webhookHistoryService.create({
@@ -63,19 +63,20 @@ export class WebhookService {
 
         channel.ack(message);
       } else {
+    
         throw new Error('Error in handler');
       }
     } catch (error) {
-
+      Logger.error({error}, error.message);
       const { code } = error;
       let statusCode = 500
       let header= {}
   
+      if (error.response){
 
-      if (code != "ECONNABORTED" || code != "ECONNREFUSED") {
         let { status, headers } = error.response;
-       statusCode  = status
-       header  = headers
+        statusCode  = status
+        header  = headers
       } 
       
       const webhookHistory = await this.webhookHistoryService.create({
@@ -87,6 +88,7 @@ export class WebhookService {
           : WebhookStatus.FAILED,
         headers: header,
       });
+
 
       await this.webhookRepo.updateWebhookWithId(getContent.id, {
         retryAttempt: getContent.try_attempt,
