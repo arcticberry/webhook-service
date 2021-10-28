@@ -34,6 +34,7 @@ export class EventConsumerService {
       .then(({ channel }) => {
         channel.consume(queue, (msg) => {
           console.log('msg.fields.redelivered---->>', msg.fields.redelivered);
+          channel.ack(msg)
           if (msg.fields.redelivered) {
             new Promise((resolve, reject) => {
               reject(
